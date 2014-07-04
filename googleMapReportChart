@@ -1,0 +1,30 @@
+<apex:page sidebar="false" showHeader="false">
+    <apex:includeScript value="https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js" />
+    <apex:includeScript value="https://www.google.com/jsapi" />
+    <script>
+        google.load('visualization', '1', {
+            'packages': ['geomap']
+        });
+        $(document).ready(function () {
+            $.ajax('/services/data/v29.0/analytics/reports/{!$CurrentPage.parameters.reportId}', {
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader('Authorization', 'Bearer {!$Api.Session_ID}');
+                },
+                success: function (reportResult) {
+                    var chartPoints = [];
+                    $.each(reportResult.groupingsDown.groupings, function (index, value) {
+                        chartPoints.push([value.label, reportResult.factMap[value.key + "!T"].aggregates[0].value]);
+                    });
+                    var options = {};
+                    var labels = [
+                        ['Country', 'Metric']
+                    ];
+                    var myData = google.visualization.arrayToDataTable(labels.concat(chartPoints));
+                    var chart = new google.visualization.GeoMap(document.getElementById('chart'));
+                    chart.draw(myData, options);
+                }
+            });
+        });
+    </script>
+    <div id="chart" height="500px" width="500px"></div>
+</apex:page>

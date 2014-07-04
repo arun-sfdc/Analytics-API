@@ -1,0 +1,28 @@
+<apex:page renderAs="PDF" controller="ReportPDFController" showHeader="false" sidebar="false">
+    <apex:repeat value="{!sections}" var="section">
+        <apex:image url="{!URLFOR($Resource.acmeLogo)}"/>
+        <div style="font: 36px Verdana; margin-bottom: 20px;">
+    		Weekly Status Report - March 18, 2014
+    	</div>
+        <table width="100%" class="table-bordered" style="background-color: #D8F6CE; margin-bottom: 20px;">
+            <thead>
+                <tr>
+                   <apex:repeat value="{!reportHeaders}" var="header">
+                    <th style="font: 18px Verdana; text-decoration: underline">{!header}</th>
+                    </apex:repeat>
+    
+                </tr>
+            </thead>
+            <tbody>
+                <apex:repeat value="{!section}" var="row">
+                    <tr>
+                        <apex:repeat value="{!row}" var="cell">
+                            <td style="background-color: {!cell.bgcolor}">{!cell.value}</td>
+                        </apex:repeat>
+                    </tr>
+                </apex:repeat>
+            </tbody>
+        </table>
+        <div style="page-break-after:always;"/> 
+    </apex:repeat>
+</apex:page>

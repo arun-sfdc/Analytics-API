@@ -1,0 +1,123 @@
+<apex:page showheader="false">
+    <script src="//cdnjs.cloudflare.com/ajax/libs/numeral.js/1.4.5/numeral.min.js"></script>
+    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.0/angular.min.js"></script>
+    <script type="text/javascript" src="//cdn.rawgit.com/arun-sfdc/Analytics-API/master/ngAnalyticsApi.js"></script>
+    <script type="text/javascript" src="//cdn.rawgit.com/arun-sfdc/Analytics-API/master/ngColorCode.js"></script>
+<script>
+    var HEADER = ['Industry', 'Account', 'Open', 'Closed', 'Open as %age'];
+    var REPORTS = ['00Of0000000YMYV', '00Of0000000YMYa'];
+    var RECORD_COUNT = false; // Ignore record count unless its the only aggregate
+    
+    // var COLUMNS = null;// Use this for default report formatting
+    // var COL_CODE_RULES = null; // Use this for no color coding
+    
+    var COLUMNS = function(row) {
+        return [
+            row[0], 
+            row[1], 
+            numeral(row[2]).format('$0,0.00'), 
+            numeral(row[3]).format('$0,0.00'), 
+            numeral(row[2]/(row[2]+row[3])).format('0.0%')];
+    };
+    
+    var COL_CODE_RULES = [
+        // Rule: [Column Index, Low, High, Color]
+        [3, 200000, 800000, 'lightgreen'],
+        [3, null, 200000, 'orange'],
+        [4, 2000000, null, 'green']
+    ];
+    
+    angular.module('myApp', ['analyticsApi', 'colorcode']).controller('myController', ['analyticsApiService', 'colorcodeService', '$scope',
+        function myController(analyticsApiService, colorcodeService, $scope) {
+            analyticsApiService.init('{!$Api.Session_ID}');
+            var aggLength = 0;            
+            analyticsApiService.fetchReports(REPORTS , function(reportResults) { // Run the reports using Analytics API
+                var mergedrows = {};
+                var addAggregates = function(result, row, grouping) {
+                    angular.forEach(result.factMap[grouping.key+'!T'].aggregates, function(agg, akey) {
+                        if(true == RECORD_COUNT || result.reportMetadata.aggregates[akey] != "RowCount"
+                            || 1 == result.reportMetadata.aggregates.length) {
+                            if(null === COLUMNS)
+                                row.push(agg.label); // Collect the first aggregate
+                            else
+                               row.push(agg.value); // Collect the first aggregate
+                        }
+                    });
+                };
+                angular.forEach(reportResults, function(result, key) {
+                    angular.forEach(result.groupingsDown.groupings, function(grouping, gkey) {
+                        if(grouping.groupings.length !== 0) {
+                            angular.forEach(grouping.groupings, function(grouping2, gkey2) {
+                                var gLabel = grouping.label + grouping2.label;
+                                if(undefined === mergedrows[gLabel])
+                                    mergedrows[gLabel] = [gkey2 === 0 ? grouping.label : '', grouping2.label];
+                                addAggregates(result, mergedrows[gLabel], grouping2);
+                            });
+                        } else {
+                            if(undefined === mergedrows[grouping.label])
+                                mergedrows[grouping.label] = [grouping.label];
+                            addAggregates(result, mergedrows[grouping.label], grouping);
+                        }
+                    });
+                    aggLength += Math.max(1, (result.reportMetadata.aggregates.length - (RECORD_COUNT ? 0 : 1)));
+                });
+                $scope.header = HEADER;
+                $scope.rows = [];
+                for(var key in mergedrows) {
+                    if(REPORTS.length == 1 || aggLength + reportResults[0].reportMetadata.groupingsDown.length == mergedrows[key].length) { // Apply Inner Join
+                        if(null != COLUMNS) {
+                            mergedrows[key] = COLUMNS(mergedrows[key]);
+                        }
+                        $scope.rows.push(mergedrows[key]);
+                    }
+                }
+                $scope.table = true;
+                $scope.gLength = reportResults[0].reportMetadata.groupingsDown.length - 1;
+                var setColors = function() {
+                    if(null !== COL_CODE_RULES) {
+                        setTimeout(function() {
+                            angular.forEach(COL_CODE_RULES, function(item, key) {
+                                colorcodeService.applyColor('col'+(item[0] - 1), item[1], item[2], item[3]);
+                            });
+                        }, 10);
+                    }
+                };
+                setColors();
+                $scope.$watch('table', setColors); 
+            });
+        }
+    ]);
+</script>
+<div ng-app="myApp" ng-controller="myController">
+    <div class="scorecard">
+        <button ng-click="table=true">Table View</button><button ng-click="table=false">Card View</button>
+        <div ng-repeat="row in rows track by $index" class="row" ng-if="false == table">
+            <p ng-repeat="cell in row track by $index">
+                <b ng-if="gLength >=$index">{{cell}}</b>
+                <span ng-if="gLength < $index">{{header[$index]}}..............{{cell}}</span>
+            </p>
+        </div>
+        <table class="scorecard" ng-if="true == table">
+             <tr><th ng-repeat="col in header track by $index">{{col}}</th></tr>
+             <tr ng-repeat="row in rows track by $index">
+                 <td ng-repeat="cell in row track by $index" class="col{{$index}}">{{cell}}</td>
+             </tr>
+        </table>
+    </div>
+</div>
+<style>
+th,td{
+    border: 1px solid gray;
+    padding: 4px;
+}
+.scorecard{
+    padding: 24px;
+    font: 24px Helvetica;
+    text-align: left;
+}
+.row{
+    padding-bottom: 24px;
+    border-bottom: 1px solid gray;
+}
+</style>
+</apex:page>

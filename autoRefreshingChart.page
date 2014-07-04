@@ -1,0 +1,37 @@
+<apex:page sidebar="false" showHeader="false">
+ <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+ <script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.3.3/d3.min.js"></script>
+ <script src="//cdnjs.cloudflare.com/ajax/libs/nvd3/1.0.0-beta/nv.d3.min.js"></script>
+ <script>
+ var drawChart = function(divId, matrixReportId) {
+        $.ajax('/services/data/v29.0/analytics/reports/'+matrixReportId,
+            {
+                beforeSend: function(xhr) {
+                    xhr.setRequestHeader('Authorization', 'Bearer {!$Api.Session_ID}');
+                },
+                success: function(response) {
+                    console.log(response);
+                    var chart = nv.models.multiBarChart().showControls(false).stacked(true);
+                    var chartData = [];
+                    document.getElementById(divId).innerHTML = '';
+                    $.each(response.groupingsDown.groupings, function(di, de) {
+                        var values = [];
+                        chartData.push({"key":de.label, "values": values});
+                        $.each(response.groupingsAcross.groupings, function(ai, ae) {
+                            values.push({"x": ae.label, "y": response.factMap[de.key+"!"+ae.key].aggregates[0].value});
+                        });
+                    });
+                    d3.select('#'+divId).datum(chartData).transition().duration(500).call(chart);
+                    window.setTimeout(function(){ 
+                        drawChart(divId, matrixReportId);
+                    }, 300000); // Refresh every 5 minutes
+                }
+            }
+        );
+ };
+ $(document).ready(function(){ 
+    drawChart('chart', '00OB0000000cdAY');
+});
+</script>
+<svg id="chart" height="25%" width="80%" style="margin: 2%;"></svg>
+</apex:page>

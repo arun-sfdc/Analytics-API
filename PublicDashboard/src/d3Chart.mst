@@ -1,0 +1,23 @@
+<html>
+ <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+ <script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.3.3/d3.min.js"></script>
+ <script src="//cdnjs.cloudflare.com/ajax/libs/nvd3/1.0.0-beta/nv.d3.min.js"></script>
+ <script>
+ $(document).ready(function(){
+	var response = eval({{{reportResult}}});
+	var chart = nv.models.multiBarChart();
+	var chartData = [];
+	$.each(response.groupingsDown.groupings, function(di, de) {
+	    var values = [];
+	    chartData.push({"key":de.label, "values": values});
+	    $.each(response.groupingsAcross.groupings, function(ai, ae) {
+		values.push({"x": ae.label, "y": response.factMap[de.key+"!"+ae.key].aggregates[0].value});
+	    });
+	});
+	d3.select('#chart').datum(chartData).transition().duration(500).call(chart);
+});
+</script>
+This is a demo app that publishes Salesforce Analytics to a public site.
+For performance reasons, the data is refreshed only every 10 minutes!
+<svg id="chart" height="500px" width="500px" style="margin: 20px;"></svg>
+</html>

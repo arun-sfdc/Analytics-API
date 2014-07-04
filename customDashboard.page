@@ -1,0 +1,52 @@
+<apex:page showheader="false">
+    <head>
+        <title>Live Dashboards</title>
+        <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.0/angular.min.js"></script>
+        <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+        <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/d3/3.3.3/d3.min.js"></script>
+        <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/nvd3/1.0.0-beta/nv.d3.min.js"></script>
+        <script type="text/javascript" src="//rawgithub.com/arun-sfdc/Analytics-API/master/ngSfdcChart.js"></script>
+        <script type="text/javascript" src="//rawgithub.com/arun-sfdc/Analytics-API/master/ngSfdcDashApiService.js"></script>
+    </head>
+    <script>
+        angular.module('myApp', ['sfdcCharts', 'dashApi']).controller('myController', ['dashApiService', '$scope', '$http', '$timeout',
+            function myController(dashApiService, $scope, $http, $timeout) {
+                dashApiService.init('{!$Api.Session_ID}', '01Zx000000061JG', function (response) {
+                    if (response !== null) {
+                        var numColumns = 4;
+                        $scope.columns = new Array(numColumns);
+                        angular.forEach(response.componentData, function (e, i) {
+                            if (e.status.dataStatus === "DATA" && e.reportResult !== null) {
+                                if (!$scope.columns[i % numColumns]) {
+                                    $scope.columns[i % numColumns] = {
+                                        components: []
+                                    };
+                                }
+                                e.type = ((e.reportResult.reportMetadata.groupingsDown.length > 1) ? 'bar' : 'pie');
+                                e.metadata = response.dashboardMetadata.components[i];
+                                $scope.columns[i % numColumns].components.push(e);
+                            }
+                        });
+                    }
+                    $timeout(dashApiService.refresh, 10000);
+                });
+                dashApiService.fetchData();
+            }
+        ]);
+    </script>
+    <style>
+        .nvtooltip {display: none;}
+    </style>
+    <div ng-app="myApp" ng-controller="myController">
+        <table>
+            <tr>
+                <td ng-repeat="column in columns track by $index" valign="top">
+                    <div ng-repeat="component in column.components">
+                        <span><b>{{component.metadata.title}}</b></span>
+                        <sfdc-Chart type="component.type" data="component.reportResult"></sfdc-Chart>
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+</apex:page>

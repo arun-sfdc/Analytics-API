@@ -1,0 +1,33 @@
+<apex:page sidebar="false" showHeader="false">
+    <apex:includeScript value="https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js" />
+    <apex:includeScript value="https://www.google.com/jsapi" />
+    <script>
+        google.load('visualization', '1', {
+            'packages': ['table']
+        });
+        $(document).ready(function () {
+            $.ajax('/services/data/v29.0/analytics/reports/{!$CurrentPage.parameters.reportId}', {
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader('Authorization', 'Bearer {!$Api.Session_ID}');
+                },
+                success: function (reportResult) {
+                    var chartPoints = [];
+                    $.each(reportResult.groupingsDown.groupings, function (index, value) {
+                        chartPoints.push([value.label, reportResult.factMap[value.key + "!T"].aggregates[0].value]);
+                    });
+                    var options = {};
+                    var labels = [
+                        [
+                        reportResult.reportExtendedMetadata.groupingColumnInfo[reportResult.reportMetadata.groupingsDown[0].name].label,
+                        reportResult.reportExtendedMetadata.aggregateColumnInfo[reportResult.reportMetadata.aggregates[0]].label
+                        ]
+                    ];
+                    var myData = google.visualization.arrayToDataTable(labels.concat(chartPoints));
+                    var table = new google.visualization.Table(document.getElementById('table'));
+                    table.draw(myData, {showRowNumber: false});
+                }
+            });
+        });
+    </script>
+    <div id="table" style="height: 400px;width:400px;"></div>
+</apex:page>

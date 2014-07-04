@@ -1,0 +1,55 @@
+<apex:page sidebar="false" showHeader="false">
+ <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+ <script src="//cdnjs.cloudflare.com/ajax/libs/raphael/2.1.2/raphael-min.js"></script>
+ <script src="//cdnjs.cloudflare.com/ajax/libs/graphael/0.5.1/g.raphael-min.js"></script>
+ <script src="//cdnjs.cloudflare.com/ajax/libs/graphael/0.5.1/g.dot-min.js"></script>
+ <script>
+ $(document).ready(function(){
+    $.ajax('/services/data/v29.0/analytics/reports/00OB0000000cbyb',
+        {
+            beforeSend: function(xhr) {
+                xhr.setRequestHeader('Authorization', 'Bearer {!$Api.Session_ID}');
+            },
+            success: function(response) {
+                var valuesx = [];
+                var labelsx = new Array(response.groupingsDown.groupings.length);
+                var valuesy = [];
+                var labelsy = new Array(response.groupingsAcross.groupings.length);
+                var size = [];
+                $.each(response.groupingsDown.groupings, function(di, de) {
+                    $.each(response.groupingsAcross.groupings, function(ai, ae) {
+                        valuesx.push(di);
+                        labelsx[di] = de.label;
+                        valuesy.push(ai);
+                        labelsy[ai] = ae.label;
+                        size.push((response.factMap[de.key+"!"+ae.key].aggregates[0].value));
+                    });
+                });
+                var r = Raphael("chart");
+                r.dotchart(10, 10, 1200, 800, valuesx, valuesy, size, 
+                    {
+                        symbol: "o", 
+                        max: 20, 
+                        heat: true, 
+                        axis: "0 0 1 1", 
+                        axisxstep: response.groupingsDown.groupings.length - 1, 
+                        axisystep: response.groupingsAcross.groupings.length - 1, 
+                        axisxlabels: labelsx, 
+                        axisxtype: " ", 
+                        axisytype: " ", 
+                        axisylabels: labelsy
+                    }
+                ).hover(function () {
+                        this.marker = this.marker || r.tag(this.x, this.y, this.value, 0, this.r + 2).insertBefore(this);
+                        this.marker.show();
+                    }, function () {
+                        this.marker && this.marker.hide();
+                    }
+                );
+            }
+        }
+    );
+});
+</script>
+<div id="chart" style="width:1200px; height:800px"></div>
+</apex:page>
