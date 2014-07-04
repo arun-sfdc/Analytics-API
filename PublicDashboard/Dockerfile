@@ -1,10 +1,8 @@
 # DOCKER-VERSION 0.3.4
-FROM    centos:6.4
+FROM	ubuntu
 
 # Enable EPEL for Node.js
-RUN     rpm -Uvh http://download.fedoraproject.org/pub/epel/6/i386/epel-release-6-8.noarch.rpm
-# Install Node.js and npm
-RUN     yum install -y npm
+RUN		apt-get update && apt-get -y upgrade && apt-get -y install nodejs npm git
 
 # use changes to package.json to force Docker not to use the cache
 # when we change our application's nodejs dependencies:
@@ -18,4 +16,4 @@ WORKDIR /opt/app
 ADD . /opt/app
 
 EXPOSE  8080
-CMD ["node", "/opt/app/src/index.js"]
+CMD ["nodejs", "/opt/app/src/index.js"]
