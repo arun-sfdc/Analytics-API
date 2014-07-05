@@ -6,9 +6,10 @@ var jsforce = require('jsforce');
 var morgan = require('morgan');
 
 // Constants
-var REPORTID = '00OB0000000c3YY';
-var USERNAME = '';
-var PASSWORD = '';
+var REPORTID = '00OV0000000ONGd';
+var USERNAME = process.env.SFDC_USERNAME;
+var PASSWORD = process.env.SFDC_PASSWORD;
+var LOGIN_URL = process.env.SFDC_URL;
 var CACHE_TIME = 600000;
 var PORT = 8080;
 var cacheFile = './src/cache';
@@ -32,7 +33,7 @@ app.get('/', function (req, res) {
 					} 
 				});
 		} else {
-				var conn = new jsforce.Connection();
+				var conn = new jsforce.Connection({loginUrl: LOGIN_URL});
 				conn.login(USERNAME, PASSWORD, function(err, resp) {
 				  if (err) { return console.error(err); }
 						var report = conn.analytics.report(REPORTID);
