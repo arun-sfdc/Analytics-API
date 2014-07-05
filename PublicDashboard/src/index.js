@@ -3,6 +3,7 @@ var express = require('express');
 var fs = require('fs');
 var Mustache = require('mustache');
 var jsforce = require('jsforce');
+var morgan = require('morgan');
 
 // Constants
 var REPORTID = '00OB0000000c3YY';
@@ -15,6 +16,7 @@ var template = './src/d3Chart.mst';
 
 // App
 var app = express();
+app.use(morgan());
 app.get('/', function (req, res) {
 	var writeResponse = function(result) {
 			fs.readFile(template, function (err, data) {
