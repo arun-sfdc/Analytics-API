@@ -6,7 +6,7 @@ var jsforce = require('jsforce');
 var morgan = require('morgan');
 
 // Constants
-var REPORTID = '00OV0000000ONGd';
+var REPORTID = process.env.SFDC_REPORTID;
 var USERNAME = process.env.SFDC_USERNAME;
 var PASSWORD = process.env.SFDC_PASSWORD;
 var LOGIN_URL = process.env.SFDC_URL;
