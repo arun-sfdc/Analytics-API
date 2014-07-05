@@ -10,7 +10,7 @@ var REPORTID = process.env.SFDC_REPORTID;
 var USERNAME = process.env.SFDC_USERNAME;
 var PASSWORD = process.env.SFDC_PASSWORD;
 var LOGIN_URL = process.env.SFDC_URL;
-var CACHE_TIME = 600000;
+var CACHE_TIME = (process.env.SFDC_CACHEMINS || 10) * 60000;
 var PORT = 8080;
 var cacheFile = './src/cache';
 var template = './src/d3Chart.mst';
@@ -21,7 +21,7 @@ app.use(morgan());
 app.get('/', function (req, res) {
 	var writeResponse = function(result) {
 			fs.readFile(template, function (err, data) {
-				res.write(Mustache.render(data.toString(), {reportResult: result}));
+				res.write(Mustache.render(data.toString(), {reportResult: result, cacheMins: CACHE_TIME/60000}));
 				res.end();
 			});
 	};

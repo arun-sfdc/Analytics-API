@@ -22,7 +22,7 @@
 });
 </script>
 This is a demo app that publishes Salesforce Analytics to a public site.
-For performance reasons, the data is refreshed only every 10 minutes!
+For performance reasons, the data is refreshed only every {{cacheMins}} minutes!
 <svg id="chart" height="600px" width="1200px" style="padding: 40px;"></svg>
 <style>
 		.nvtooltip {display: none;}
