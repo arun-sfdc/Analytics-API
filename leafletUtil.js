@@ -2,7 +2,7 @@
     // simple util method 
     // arguments - Leaflet map object, zoom, lat-long for center, array of points[lat, long, radium(0-100)] 
     function drawLeafletMap(map, zoom, base, points) {
-        var baseRadius = 4000;
+        var baseRadius = 6000;
         var osmUrl='http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
         var osmAttrib='Map data © <a href="http://openstreetmap.org">OpenStreetMap</a> contributors';
         var osm = new L.TileLayer(osmUrl, {minZoom: zoom, maxZoom: zoom, attribution: osmAttrib});
