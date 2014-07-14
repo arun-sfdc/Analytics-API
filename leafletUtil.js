@@ -18,7 +18,7 @@
                     color: 'red',
                     fillColor: '#f03',
                     fillOpacity: 0.5
-                }).addTo(map);
+                }).bindPopul(e[3]).addTo(map);
             }, (i+1)*100);
         });
     };
