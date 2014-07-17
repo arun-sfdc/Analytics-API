@@ -22,3 +22,30 @@
             }, (i+1)*100);
         });
     };
+    
+    // simple util method to geocode results
+    // input is array for rows, the first cell of each row is the location to be geocoded
+    // uses the free Google Geocode API, hence the a bit slow
+    // cached using localstorage for faster subsequent access
+    var asyncGeoCode = function(input, output) {
+            var getGeoCode = function(e, resp) {
+                var loc = resp.results[0].geometry.location;
+                output.push([loc.lat, loc.lng, e[1], e[0]]);
+            };
+            input.forEach(function(e, i, arr) {
+                if(localStorage.getItem(e[0])) {
+                    getGeoCode(e, JSON.parse(localStorage.getItem(e[0])));
+                } else {
+                    var d = new Date().getTime();
+                    while(new Date().getTime() - d <= 100) {}
+                    $.ajax('https://maps.googleapis.com/maps/api/geocode/json?address='+e[0], {
+                        success: function(resp) {
+                            if(resp.status == "OK") {
+                                localStorage.setItem(e[0], JSON.stringify(resp));
+                                getGeoCode(e, resp);
+                            }
+                        }
+                    });
+                }
+            });
+        };
