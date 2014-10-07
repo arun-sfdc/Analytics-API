@@ -9,9 +9,9 @@ var morgan = require('morgan');
 var REPORTID = process.env.SFDC_REPORTID;
 var USERNAME = process.env.SFDC_USERNAME;
 var PASSWORD = process.env.SFDC_PASSWORD;
-var LOGIN_URL = process.env.SFDC_URL;
-var CACHE_TIME = (process.env.SFDC_CACHEMINS || 10) * 60000;
-var PORT = 8080;
+var LOGIN_URL = process.env.SFDC_URL||'https://salesforce.com';
+var CACHE_TIME = (process.env.SFDC_CACHEMINS || 1) * 60000;
+var PORT = 9000;
 var cacheFile = './src/cache';
 var template = './src/d3Chart.mst';
 
@@ -21,7 +21,7 @@ app.use(morgan());
 app.get('/', function (req, res) {
 	var writeResponse = function(result) {
 			fs.readFile(template, function (err, data) {
-				res.write(Mustache.render(data.toString(), {reportResult: result, cacheMins: CACHE_TIME/60000}));
+				res.write(Mustache.render(data.toString(), {reportResult: result}));
 				res.end();
 			});
 	};
@@ -36,11 +36,14 @@ app.get('/', function (req, res) {
 				var conn = new jsforce.Connection({loginUrl: LOGIN_URL});
 				conn.login(USERNAME, PASSWORD, function(err, resp) {
 				  if (err) { return console.error(err); }
-						var report = conn.analytics.report(REPORTID);
-						report.execute(function(err, result) {
-							result = JSON.stringify(result);
-							fs.writeFile(cacheFile, result, 'utf-8');
-							writeResponse(result);
+						conn.analytics.reports(function(err, reports) {
+								var reportId = REPORTID||reports[0].id; 
+								var report = conn.analytics.report(reportId);
+								report.execute(function(err, result) {
+									result = JSON.stringify(result);
+									fs.writeFile(cacheFile, result, 'utf-8');
+									writeResponse(result);
+								});
 						});
 				});
 		}

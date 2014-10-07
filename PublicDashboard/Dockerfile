@@ -6,14 +6,12 @@ RUN		apt-get update && apt-get -y upgrade && apt-get -y install nodejs npm git
 
 # use changes to package.json to force Docker not to use the cache
 # when we change our application's nodejs dependencies:
-ADD ./src/package.json /tmp/package.json
-RUN cd /tmp && npm install
-RUN mkdir -p /opt/app && cp -a /tmp/node_modules /opt/app/
-
-# From here we load our application's code in, therefore the previous docker
-# "layer" thats been cached will be used if possible
+RUN mkdir -p /opt/app
 WORKDIR /opt/app
-ADD . /opt/app
+RUN git init
+RUN git pull https://github.com/arun-sfdc/Analytics-API.git
+RUN cd PublicDashboard/src
+RUN npm install
 
-EXPOSE  8080
+EXPOSE	9000 
 CMD ["nodejs", "/opt/app/src/index.js"]
