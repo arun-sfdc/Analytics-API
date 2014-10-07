@@ -21,7 +21,7 @@
 	}, 5000);
 });
 </script>
-<p style="font-size:48p; margin:40px;">Try the demo: http://snipurl.com/dashdemo</p>
+<p style="font-size:48px; margin:40px;">Try the demo: http://snipurl.com/dashdemo</p>
 
 <svg id="chart" height="600px" width="1200px" style="padding: 40px;"></svg>
 <style>
