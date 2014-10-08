@@ -2,29 +2,54 @@
  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
  <script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.3.3/d3.min.js"></script>
  <script src="//cdnjs.cloudflare.com/ajax/libs/nvd3/1.0.0-beta/nv.d3.min.js"></script>
+ <script src="https://cdn.rawgit.com/jongha/jquery-jsontotable/master/dist/jquery.jsontotable.min.js"></script>
+ <script type="text/javascript" src="https://www.google.com/jsapi"></script>
  <script>
- $(document).ready(function(){
-	var response = eval({{{reportResult}}});
-	var chart = nv.models.multiBarChart();
-	var chartData = [];
-	$.each(response.groupingsDown.groupings, function(di, de) {
-	    var values = [];
-	    chartData.push({"key":de.label, "values": values});
-	    $.each(response.groupingsAcross.groupings, function(ai, ae) {
-		values.push({"x": ae.label, "y": response.factMap[de.key+"!"+ae.key].aggregates[0].value});
-	    });
-	});
-	d3.select('#chart').datum(chartData).transition().duration(500).call(chart);
-	setTimeout(function() {
-		chart.stacked(true);
-		d3.select('#chart').datum(chartData).transition().duration(500).call(chart);
-	}, 5000);
-});
+		google.load("visualization", "1", {packages:["corechart"]});
+		$(document).ready(function(){
+				var response = eval({{{reportResult}}});
+				var chart = nv.models.multiBarChart();
+				var chartData = [];
+				var tableData = [[
+					response.reportExtendedMetadata.groupingColumnInfo[response.reportMetadata.groupingsDown[0].name].label,
+					response.reportExtendedMetadata.groupingColumnInfo[response.reportMetadata.groupingsAcross[0].name].label,
+					response.reportExtendedMetadata.aggregateColumnInfo[response.reportMetadata.aggregates[0]].label,
+				]];
+				var pieData = [[
+					response.reportExtendedMetadata.groupingColumnInfo[response.reportMetadata.groupingsDown[0].name].label,
+					response.reportExtendedMetadata.aggregateColumnInfo[response.reportMetadata.aggregates[0]].label,
+				]];
+				$.each(response.groupingsDown.groupings, function(di, de) {
+						var values = [];
+						chartData.push({"key":de.label, "values": values, "value": response.factMap[de.key+'!T'].aggregates[0].value});
+						$.each(response.groupingsAcross.groupings, function(ai, ae) {
+								values.push({"x": ae.label, "y": response.factMap[de.key+"!"+ae.key].aggregates[0].value});
+								tableData.push([de.label, ae.label, response.factMap[de.key+'!'+ae.key].aggregates[0].value]);
+						});
+						pieData.push([de.label, response.factMap[de.key+'!T'].aggregates[0].value]);
+				});
+				$.jsontotable(tableData, { id: '#jsontotable', header: true});
+				d3.select('#chart').datum(chartData).transition().duration(500).call(chart);
+				setTimeout(function() {
+						chart.stacked(true);
+						$('#chart')[0].innerHTML='';
+						d3.select('#chart').datum(chartData).transition().duration(500).call(chart);
+				}, 5000);
+				var myData = google.visualization.arrayToDataTable(pieData);
+				new google.visualization.PieChart($('#piechart')[0]).draw(myData, {});
+				$('#jsontotable')[0].style.display='inline';
+		});
 </script>
-<p style="font-size:48px; margin:40px;">Try the demo: http://snipurl.com/dashdemo</p>
-
-<svg id="chart" height="600px" width="1200px" style="padding: 40px;"></svg>
+<p style="font-size:2.3em; margin:0.5em;">Try the demo: http://snipurl.com/dashdemo</p>
+<div style="float:left;display:inline">
+<svg id="chart" height="40em" width="40em" style="padding: 3em;"></svg>
+</div>
+<div id="piechart" style="float:left;width:30em;height:25em;"></div>
+<div id="jsontotable" style="float:left;display:none;width: 30em"></div>
 <style>
-		.nvtooltip {display: none;}
+    .nvtooltip {display: none;}
+	.jsontotable{ -webkit-transition: all 1s ease-in-out;}
+	table{border: 1px gray solid;}
+	td{border: 1px gray dotted;}
 </style>
 </html>
