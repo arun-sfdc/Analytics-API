@@ -37,12 +37,24 @@ app.get('/', function (req, res) {
 				conn.login(USERNAME, PASSWORD, function(err, resp) {
 				  if (err) { return console.error(err); }
 						conn.analytics.reports(function(err, reports) {
+            if (err) { return console.error(err); }
 								var reportId = REPORTID||reports[0].id; 
 								var report = conn.analytics.report(reportId);
-								report.execute(function(err, result) {
-									result = JSON.stringify(result);
-									if(CACHE_TIME > 0) fs.writeFile(CACHEFILE, result, 'utf-8');
-									writeResponse(result);
+								report.executeAsync(function(err, instance) {
+                  if (err) { return console.error(err); }
+                  var pollToComplete = function() {
+                    report.instance(instance.id).retrieve(function(err, result) {
+                      if (err) { return console.error(err); }
+                      if(result.attributes.status == 'Success') {
+                        result = JSON.stringify(result);
+                        if(CACHE_TIME > 0) fs.writeFile(CACHEFILE, result, 'utf-8');
+                        writeResponse(result);
+                      } else {
+                        pollToComplete();
+                      }
+                    });
+                  };
+                  pollToComplete();
 								});
 						});
 				});
