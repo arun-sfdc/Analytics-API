@@ -40,7 +40,6 @@
 				$('#jsontotable')[0].style.display='inline';
 		});
 </script>
-<p style="font-size:2.3em; margin:0.5em;">Salesforce1 Report API demo: <a href="http://snipurl.com/dashdemo">http://snipurl.com/dashdemo</a></p>
 <div style="float:left;display:inline">
 <svg id="chart" height="40em" width="40em" style="padding: 3em;"></svg>
 </div>
