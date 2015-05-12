@@ -1,0 +1,13 @@
+{
+  "name": "SalesforceAnalyticsOnPublicSites",
+  "version": "0.0.1",
+  "description": "Built using Node.js, JSForce and Docker/CentOS",
+  "author": "@arun_sfdc",
+  "dependencies": {
+    "express": "3.2.4",
+	"mustache": "0.8.2",
+	"morgan":"1.1.1",
+	"jsforce":"1.4.1",
+	"underscore":"*"
+  }
+}
