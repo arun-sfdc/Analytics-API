@@ -9,8 +9,8 @@ var compression = require('compression')
 
 // Constants
 var PORT = 9000;
-var TEMPLATE = 'index.mst';
-var TEMPLATE_TABLE = 'table.mst';
+var TEMPLATE = './src/index.mst';
+var TEMPLATE_TABLE = './src/table.mst';
 var PAGESIZE = 2000;
 var OAUTH2 = new jsforce.OAuth2({
 		clientId : process.env.CID,
