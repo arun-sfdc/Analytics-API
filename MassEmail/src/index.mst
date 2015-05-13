@@ -1,17 +1,13 @@
 <html>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
  <body>
-	<table>
-	{{#data}}
-	{{#.}}
-	<tr>
-	{{#dataCells}}
-	<td>
-	{{label}}
-	</td>
-	{{/dataCells}}
-	</tr>
-	{{/.}}
-	{{/data}}
-	</table>
+	Loading report {{reportid}} with Turbo Report API.
+	<div id='results'></div>
+	<script>
+		jQuery.ajax('/report?reportId={{reportid}}&accessToken={{accessToken}}&refreshToken={{refreshToken}}&instanceUrl={{{instanceUrl}}}').done(
+			function(data) {
+				jQuery('#results')[0].innerHTML = data;
+			});
+	</script>
  </body>
 </html>

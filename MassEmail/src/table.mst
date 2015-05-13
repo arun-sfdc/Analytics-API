@@ -1,0 +1,13 @@
+<table>
+{{#data}}
+{{#.}}
+<tr>
+{{#dataCells}}
+<td>
+{{label}}
+</td>
+{{/dataCells}}
+</tr>
+{{/.}}
+{{/data}}
+</table>
