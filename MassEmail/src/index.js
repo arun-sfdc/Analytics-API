@@ -117,3 +117,7 @@ app.get('/report', function (req, res) {
 		});
 });
 app.listen(PORT);
+app.on('connection', function(socket) {
+  console.log("A new connection was made by a client.");
+  socket.setTimeout(300 * 1000); 
+})
