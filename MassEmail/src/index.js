@@ -15,7 +15,7 @@ var PAGESIZE = 2000;
 var OAUTH2 = new jsforce.OAuth2({
 		clientId : process.env.CID,
 		clientSecret : process.env.CS,
-		redirectUri : 'https://192.168.59.103:9000/'
+		redirectUri : process.env.URL
 });
 
 // PATCH JSFORCE for Turbo Pilot
