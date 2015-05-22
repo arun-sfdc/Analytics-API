@@ -7,7 +7,7 @@
     td {border: 1px gray dotted;}
 </style>
 {{#data}}
-<div style="float:left; width: 40em;">
+<div style="float:left; width: 45%;">
     <b>{{attributes.reportName}}</b>
     <div id="chart{{id}}"></div>
 </div>

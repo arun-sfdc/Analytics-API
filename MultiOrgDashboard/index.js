@@ -7,7 +7,7 @@ app.listen(9000);
 app.get('/', function(req, res) {
     var METRICS = [{
             reportid: '', username: '', password: '', loginurl: 'https://na1.salesforce.com', chart: 'pie'}, // chart = pie, bar or table
-          { reportid: '', username: '', password: '!j', loginurl: 'https://na1.salesforce.com', chart: 'table'} ];
+          { reportid: '', username: '', password: '', loginurl: 'https://na1.salesforce.com', chart: 'bar'} ];
 
     function getReportResults(metric, callback) {
         var conn = new jsforce.Connection({
@@ -36,7 +36,7 @@ app.get('/', function(req, res) {
         if (result.length < METRICS.length) {
             getReportResults(METRICS[result.length], afterResult);
         } else {
-            fs.readFile('./src/template.mst', function(err, data) {
+            fs.readFile('./template.mst', function(err, data) {
                 res.write(Mustache.render(data.toString(), {
                     data: result,
                     string: JSON.stringify(result)
