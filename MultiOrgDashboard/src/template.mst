@@ -1,0 +1,49 @@
+<html>
+ <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+ <script src="//cdn.rawgit.com/jongha/jquery-jsontotable/master/dist/jquery.jsontotable.min.js"></script>
+ <script type="text/javascript" src="//www.google.com/jsapi"></script>
+<style>
+	table{border: 1px gray solid;}
+	td{border: 1px gray dotted;}
+</style>
+{{#data}}
+<div style="float:left; width: 40em;">
+		<b>{{attributes.reportName}}</b>
+		<div id="chart{{id}}"></div>
+</div>
+{{/data}}
+<script>
+		google.load("visualization", "1.1", {packages:["corechart"]});
+		$(document).ready(function(){
+				var metrics = eval('{{{string}}}');
+                for(var index in metrics) {
+						var response = metrics[index];
+						if(response.chart == 'table') {
+								var tableData = [[
+									response.reportExtendedMetadata.groupingColumnInfo[response.reportMetadata.groupingsDown[0].name].label,
+									response.reportExtendedMetadata.groupingColumnInfo[response.reportMetadata.groupingsAcross[0].name].label,
+									response.reportExtendedMetadata.aggregateColumnInfo[response.reportMetadata.aggregates[0]].label,
+								]];
+								$.each(response.groupingsDown.groupings, function(di, de) {
+										$.each(response.groupingsAcross.groupings, function(ai, ae) {
+												tableData.push([de.label, ae.label, response.factMap[de.key+'!'+ae.key].aggregates[0].value]);
+										});
+								});
+								$.jsontotable(tableData, { id: '#chart'+response.id, header: true});
+						} else { 
+								var pieData = [[
+									response.reportExtendedMetadata.groupingColumnInfo[response.reportMetadata.groupingsDown[0].name].label,
+									response.reportExtendedMetadata.aggregateColumnInfo[response.reportMetadata.aggregates[0]].label,
+								]];
+								$.each(response.groupingsDown.groupings, function(di, de) {
+										pieData.push([de.label, response.factMap[de.key+'!T'].aggregates[0].value]);
+								});
+								if(response.chart == 'bar')
+										new google.visualization.BarChart($('#chart'+response.id)[0]).draw(google.visualization.arrayToDataTable(pieData), {});
+								else 
+										new google.visualization.PieChart($('#chart'+response.id)[0]).draw(google.visualization.arrayToDataTable(pieData), {});
+						}
+                }
+		});
+</script>
+</html>
