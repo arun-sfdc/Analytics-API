@@ -1,12 +1,11 @@
 {
-  "name": "SalesforceAnalyticsOnPublicSites",
+  "name": "SalesforceMultiOrgDashboard",
   "version": "0.0.1",
-  "description": "Built using Node.js, JSForce and Docker/CentOS",
+  "description": "View all your Salesforce instances in a single Dashboard",
   "author": "@arun_sfdc",
   "dependencies": {
     "express": "3.2.4",
 	"jsforce": "1.2.0",
-	"mustache": "0.8.2",
-	"morgan":"1.1.1"
+	"mustache": "0.8.2"
   }
 }
